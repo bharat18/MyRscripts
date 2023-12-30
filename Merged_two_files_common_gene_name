@@ -1,0 +1,19 @@
+# Load necessary library
+library(dplyr)
+
+# Read the two files into data frames
+genes_file1 = read.csv('file1.csv', stringsAsFactors = FALSE)  # adjust the path to your file
+genes_file2 = read.csv('file2.csv', stringsAsFactors = FALSE)  # adjust the path to your file
+
+# Assuming the gene names are in a column named 'Gene'
+# Merge the two data frames
+merged_genes = full_join(genes_file1, genes_file2, by = 'Gene')
+
+# Extract common genes
+# Common genes are those that are not NA in any of the datasets
+common_genes = merged_genes[!is.na(merged_genes$Column_from_file1) & !is.na(merged_genes$Column_from_file2), ]
+
+# Export the list of common genes to a new CSV file
+write.csv(common_genes, 'common_genes.csv', row.names = FALSE)
+
+print("Common genes exported to common_genes.csv")
