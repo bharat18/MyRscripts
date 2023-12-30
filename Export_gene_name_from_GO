@@ -1,0 +1,44 @@
+library(biomaRt)
+library(GO.db)
+
+# Connect to the Ensembl BioMart database
+ensembl = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+
+# Define GO terms for myelination and demyelination
+# Replace these with the specific GO IDs you're interested in
+myelination_go_id = "GO:0042552"  # Example GO ID for myelination
+demyelination_go_id = "GO:0043266"  # Example GO ID for demyelination
+
+# Function to get genes for a given GO term
+get_genes_for_go_term <- function(go_id) {
+  genes = getBM(attributes = c('ensembl_gene_id', 'external_gene_name'),
+                filters = 'go', 
+                values = go_id, 
+                mart = ensembl)
+  return(genes)
+}
+
+# Retrieve genes
+myelination_genes = get_genes_for_go_term(myelination_go_id)
+demyelination_genes = get_genes_for_go_term(demyelination_go_id)
+
+# Display results
+print("Genes associated with Myelination in Mouse:")
+print(myelination_genes)
+
+print("Genes associated with Demyelination in Mouse:")
+print(demyelination_genes)
+# ... [previous script code]
+
+# Merge the two lists of genes
+merged_genes = rbind(data.frame(Category = "Myelination", Gene = myelination_genes$external_gene_name),
+                     data.frame(Category = "Demyelination", Gene = demyelination_genes$external_gene_name))
+
+# Remove duplicate entries, if any
+merged_genes_unique = merged_genes[!duplicated(merged_genes$Gene),]
+
+# Export the merged list to a CSV file
+output_file_path = "merged_genes_mouse.csv"  # Specify your desired file path and name
+write.csv(merged_genes_unique, output_file_path, row.names = FALSE)
+
+print(paste("Merged genes list exported to", output_file_path))
